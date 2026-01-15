@@ -1,0 +1,11 @@
+pyproject.toml
+src/bld_py/__init__.py
+src/bld_py/__main__.py
+src/bld_py/bootstrap.py
+src/bld_py/parser.py
+src/bld_py/traverser.py
+src/bld_py.egg-info/PKG-INFO
+src/bld_py.egg-info/SOURCES.txt
+src/bld_py.egg-info/dependency_links.txt
+src/bld_py.egg-info/entry_points.txt
+src/bld_py.egg-info/top_level.txt

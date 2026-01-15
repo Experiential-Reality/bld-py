@@ -1,0 +1,2 @@
+[console_scripts]
+bld = bld_py.__main__:main
