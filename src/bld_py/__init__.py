@@ -1,26 +1,27 @@
-# bld-py: Python bootstrap interpreter for BLD
+# bld-py: Minimal BLD Bootstrap
 #
-# This is the minimal interpreter that bootstraps BLD.
-# It does ONLY:
-#   1. Parse - .bld text → structure (B, L, D)
-#   2. Traverse - visit B/L/D in order, execute semantics
-#   3. Primitives - emit_byte, set, get, modrm, rex, etc.
+# Cost = B + D × L
 #
-# Everything else is written in BLD itself.
+# One operation: compose
+#   crystallized BLD -> bytes
+#
+# Structure IS computation. The BLD files ARE the assembler.
 
-from .parser import parse, ParsedStructure, Boundary, Link, Dimension, Semantic
-from .traverser import Traverser, State, calculate_cost, calculate_l_cost
+from .compose import (
+    compose,
+    parse,
+    analyze,
+    classify,
+    Structure,
+    BLD_SRC,
+)
 
-__version__ = '0.1.0'
+__version__ = '0.5.0'
 __all__ = [
+    'compose',
     'parse',
-    'ParsedStructure',
-    'Boundary',
-    'Link',
-    'Dimension',
-    'Semantic',
-    'Traverser',
-    'State',
-    'calculate_cost',
-    'calculate_l_cost',
+    'analyze',
+    'classify',
+    'Structure',
+    'BLD_SRC',
 ]
