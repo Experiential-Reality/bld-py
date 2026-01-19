@@ -1,0 +1,4 @@
+#!/bin/sh
+# BLD Bootstrap - compose .bld files to bytes
+BLD_PY="$(readlink -f "$0")"
+PYTHONPATH="$(dirname "$BLD_PY")/src" exec python -m bld_py "$@"

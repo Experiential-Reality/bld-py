@@ -3,18 +3,19 @@
 
 Cost = B + D × L
 
-usage: python -m bld_py <command> <path> [output]
+usage: bld <path> [output]    - compose .bld file to bytes
+       bld -x <expr>          - compose expression directly
 
-commands:
-  compose <path> [output]  - compose to bytes
-  analyze <path> [-r]      - show structure and cost
-  parse <path>             - parse to structure
+examples:
+  bld src/simple.bld out.bin  - compose simple.bld to out.bin
+  bld src/simple.bld | xxd    - compose and view hex
+  bld -x "4/pad"              - compose expression: 4 of pad
 """
 
 import pathlib
 import sys
 
-from .compose import compose, parse, analyze
+from .compose import compose, resolve
 
 
 def main() -> None:
@@ -22,47 +23,30 @@ def main() -> None:
         print(__doc__.strip())
         return
 
-    cmd = sys.argv[1]
-
-    if cmd == 'compose' and len(sys.argv) >= 3:
+    # Expression mode: bld -x "expression"
+    if sys.argv[1] == '-x' and len(sys.argv) >= 3:
         result = compose(sys.argv[2])
-        if not result:
-            print(f'error: cannot compose {sys.argv[2]}', file=sys.stderr)
-            sys.exit(1)
-        if len(sys.argv) >= 4:
-            pathlib.Path(sys.argv[3]).write_bytes(result)
-            print(f'{len(result)} bytes -> {sys.argv[3]}')
-        else:
-            sys.stdout.buffer.write(result)
+        sys.stdout.buffer.write(result)
+        return
 
-    elif cmd == 'analyze' and len(sys.argv) >= 3:
-        recursive = '-r' in sys.argv
-        print(analyze(sys.argv[2], recursive=recursive))
-
-    elif cmd == 'parse' and len(sys.argv) >= 3:
-        struct = parse(sys.argv[2])
-        if struct:
-            print(f"path: {struct.path}")
-            print(f"constants: {len(struct.constants)}")
-            print(f"fields: {len(struct.fields)}")
-            print(f"links: {len(struct.links)}")
-            print(f"dimensions: {len(struct.dimensions)}")
-            print(f"cost: {struct.cost:.3f}")
-        else:
-            print(f"error: cannot parse {sys.argv[2]}", file=sys.stderr)
-            sys.exit(1)
-
+    # File mode: bld <path> [output]
+    path = pathlib.Path(sys.argv[1])
+    if path.exists():
+        content = path.read_text()
     else:
-        # Default: treat first arg as path, compose it
-        result = compose(cmd)
-        if not result:
-            print(f'error: cannot compose {cmd}', file=sys.stderr)
+        content = resolve(sys.argv[1])
+        if content is None:
+            print(f'error: {sys.argv[1]} not found', file=sys.stderr)
             sys.exit(1)
-        if len(sys.argv) >= 3:
-            pathlib.Path(sys.argv[2]).write_bytes(result)
-            print(f'{len(result)} bytes -> {sys.argv[2]}')
-        else:
-            sys.stdout.buffer.write(result)
+
+    result = compose(content)
+
+    if len(sys.argv) >= 3:
+        out = pathlib.Path(sys.argv[2])
+        out.write_bytes(result)
+        print(f'{len(result)} bytes -> {out}')
+    else:
+        sys.stdout.buffer.write(result)
 
 
 if __name__ == '__main__':
